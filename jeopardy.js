@@ -68,9 +68,18 @@ function shortenCategory(categoryObj) {
   let shortenedClues = [];
   for (let clue of clues) {
     let { question, answer } = clue;
-    shortenedClues.push({ question, answer, showing: null });
+    shortenedClues.push({
+      question: removeHTML(question),
+      answer: removeHTML(answer),
+      showing: null,
+    });
   }
-  return { title, clues: shortenedClues };
+  return { title: removeHTML(title), clues: shortenedClues };
+}
+
+function removeHTML(htmlString) {
+  let parser = new DOMParser();
+  return parser.parseFromString(htmlString, "text/html").body.textContent;
 }
 
 /** Return object with data about a category:
@@ -168,7 +177,8 @@ function hideLoadingView() {}
 async function setupAndStart() {
   await getCategoryIDs();
   const $gameTable = $('<table id="jeopardy"></table>');
-  $("body").append($gameTable);
+  const $restartButton = $('<button id="restart">Restart</button>');
+  $("body").append([$gameTable, $restartButton]);
   fillTable();
 }
 
