@@ -105,16 +105,17 @@ async function fillTable() {
   const $tableHead = $("<thead><tr></tr></thead>");
   const $tableBody = $("<tbody>");
   for (let category of categories) {
-    $tableHead.find("tr").append($(`<td>${category.title}</td>`));
+    $tableHead
+      .find("tr")
+      .append($(`<td class="category-title">${category.title}</td>`));
   }
   for (let x = 0; x < NUM_QUESTIONS_PER_CAT; x++) {
     const $questionRow = $("<tr>");
     for (let y = 0; y < NUM_CATEGORIES; y++) {
-      $questionRow.append(
-        $(
-          `<td><div>${categories[y].clues[x].question}</div><div>${categories[y].clues[x].answer}</div></td>`
-        )
-      );
+      const $clue = $(`<td class="clue">?</td>`);
+      $clue.data({ categoryIndex: y, clueIndex: x });
+      $clue.on("click", handleClick);
+      $questionRow.append($clue);
     }
     $tableBody.append($questionRow);
   }
@@ -130,7 +131,22 @@ async function fillTable() {
  * - if currently "answer", ignore click
  * */
 
-function handleClick(evt) {}
+function handleClick(evt) {
+  const $clue = $(evt.target);
+  let { categoryIndex, clueIndex } = $clue.data();
+  let clueInfo = categories[categoryIndex].clues[clueIndex];
+  if (clueInfo.showing === "answer") {
+    return;
+  } else if (clueInfo.showing === null) {
+    clueInfo.showing = "question";
+    $clue.text(clueInfo.question);
+    return;
+  } else if (clueInfo.showing === "question") {
+    clueInfo.showing = "answer";
+    $clue.text(clueInfo.answer);
+    return;
+  }
+}
 
 /** Wipe the current Jeopardy board, show the loading spinner,
  * and update the button used to fetch data.
