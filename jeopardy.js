@@ -197,7 +197,6 @@ function hideLoadingView() {
  */
 async function setupAndStart() {
   const $loadingCircle = $(`<div class="loading">`);
-  <link href="https://fonts.googleapis.com/css2?family=Stoke" rel="stylesheet"></link>
   $("body").append($loadingCircle);
   await getCategoryIDs().then(function () {
     const $gameTable = $('<table id="jeopardy">').hide();
