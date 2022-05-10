@@ -113,7 +113,7 @@ async function getCategory(catId) {
 
 async function fillTable() {
   const $table = $("#jeopardy");
-  const $tableHead = $("<thead><tr></tr></thead>");
+  const $tableHead = $("<thead><tr>");
   const $tableBody = $("<tbody>");
   for (let category of categories) {
     $tableHead
@@ -163,11 +163,23 @@ function handleClick(evt) {
  * and update the button used to fetch data.
  */
 
-function showLoadingView() {}
+/** Note - implemented here for completeness, but showLoadingView and 
+ *  hideLoadingView could be simplified by using the jQuery toggle()
+ *  function on both the table and the loading spinner in a single
+ *  toggleLoadingState() function instead.
+ * 
+ */
+function showLoadingView() {
+  $("#jeopardy").hide();
+  $(".loading").show();
+}
 
 /** Remove the loading spinner and update the button used to fetch data. */
 
-function hideLoadingView() {}
+function hideLoadingView() {
+  $("#jeopardy").show();
+  $(".loading").hide();
+}
 
 /** Start game:
  *
@@ -184,10 +196,11 @@ function hideLoadingView() {}
  */
 async function setupAndStart() {
   await getCategoryIDs();
-  const $gameTable = $('<table id="jeopardy"></table>');
+  const $gameTable = $('<table id="jeopardy">');
   const $restartButton = $('<button id="restart">Restart</button>');
+  const $loadingCircle = $(`<div class="loading">`).hide();
   $restartButton.on("click", restart);
-  $("body").append([$gameTable, $restartButton]);
+  $("body").append([$loadingCircle, $gameTable, $restartButton]);
   fillTable();
 }
 
