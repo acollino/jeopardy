@@ -31,14 +31,13 @@ let categories = [];
  */
 
 async function getCategoryIDs() {
-  let categoryIDs = [];
   for (let x = 0; x < NUM_CATEGORIES; x++) {
     let categoryObj = await getCategory(getRandomID());
     verifyCategory(categoryObj)
-      ? (categoryIDs[x] = shortenCategory(categoryObj))
+      ? (categories[x] = shortenCategory(categoryObj))
       : x--;
   }
-  return categoryIDs;
+  return categories;
 }
 
 /** From testing with the jService API, category IDs start at 1 and
@@ -59,7 +58,7 @@ function getRandomID() {
 function verifyCategory(categoryObj) {
   let enoughGameClues = categoryObj.clues_count >= NUM_QUESTIONS_PER_CAT;
   let noInvalidClues = categoryObj.clues.every((element) => {
-    return element.invalid_count === null || element.invalid_count === 0;
+    return element.invalid_count === null && element.question !== "";
   });
   return enoughGameClues && noInvalidClues;
 }
@@ -101,7 +100,27 @@ async function getCategory(catId) {
  *   (initally, just show a "?" where the question/answer would go.)
  */
 
-async function fillTable() {}
+async function fillTable() {
+  const $table = $("#jeopardy");
+  const $tableHead = $("<thead><tr></tr></thead>");
+  const $tableBody = $("<tbody>");
+  for (let category of categories) {
+    $tableHead.find("tr").append($(`<td>${category.title}</td>`));
+  }
+  for (let x = 0; x < NUM_QUESTIONS_PER_CAT; x++) {
+    const $questionRow = $("<tr>");
+    for (let y = 0; y < NUM_CATEGORIES; y++) {
+      $questionRow.append(
+        $(
+          `<td><div>${categories[y].clues[x].question}</div><div>${categories[y].clues[x].answer}</div></td>`
+        )
+      );
+    }
+    $tableBody.append($questionRow);
+  }
+  $table.append($tableHead);
+  $table.append($tableBody);
+}
 
 /** Handle clicking on a clue: show the question or answer.
  *
@@ -130,7 +149,12 @@ function hideLoadingView() {}
  * - create HTML table
  * */
 
-async function setupAndStart() {}
+async function setupAndStart() {
+  await getCategoryIDs();
+  const $gameTable = $('<table id="jeopardy"></table>');
+  $("body").append($gameTable);
+  fillTable();
+}
 
 /** On click of start / restart button, set up game. */
 
