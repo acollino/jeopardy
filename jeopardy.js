@@ -79,7 +79,9 @@ function shortenCategory(categoryObj) {
 
 function removeHTML(htmlString) {
   let parser = new DOMParser();
-  return parser.parseFromString(htmlString, "text/html").body.textContent;
+  return parser
+    .parseFromString(htmlString, "text/html")
+    .body.textContent.toUpperCase();
 }
 
 /** Return object with data about a category:
@@ -123,7 +125,7 @@ async function fillTable() {
     for (let y = 0; y < NUM_CATEGORIES; y++) {
       const $clue = $(`<td class="clue">?</td>`);
       $clue.data({ categoryIndex: y, clueIndex: x });
-      $clue.on("click", handleClick);
+      //$clue.on("click", handleClick);
       $questionRow.append($clue);
     }
     $tableBody.append($questionRow);
@@ -174,18 +176,36 @@ function hideLoadingView() {}
  * - create HTML table
  * */
 
+/** Note - normally, I would create the button in the HTML file instead of 
+ *  in the JS code, however the given instructions state:
+ *    "We’ve provided an HTML file and CSS for the application 
+ *     (you shouldn’t change the HTML file; if you want to tweak 
+ *     any CSS things, feel free to)."
+ */
 async function setupAndStart() {
   await getCategoryIDs();
   const $gameTable = $('<table id="jeopardy"></table>');
   const $restartButton = $('<button id="restart">Restart</button>');
+  $restartButton.on("click", restart);
   $("body").append([$gameTable, $restartButton]);
   fillTable();
 }
 
 /** On click of start / restart button, set up game. */
 
-// TODO
+async function restart() {
+  await getCategoryIDs();
+  $("#jeopardy").empty();
+  fillTable();
+}
 
 /** On page load, add event handler for clicking clues */
 
-// TODO
+/** Note - this could have been done using a listener for the "load" or
+ * "DOMContentLoaded" events to trigger adding the event handler. I opted
+ *  to use event delegation instead, as it means only one event handler is 
+ *  needed, rather than adding one handler to trigger adding another.
+*/
+$("body").on("click", ".clue", handleClick);
+
+setupAndStart();
