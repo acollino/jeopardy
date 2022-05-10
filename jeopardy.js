@@ -74,14 +74,12 @@ function shortenCategory(categoryObj) {
       showing: null,
     });
   }
-  return { title: removeHTML(title), clues: shortenedClues };
+  return { title: removeHTML(title).toUpperCase(), clues: shortenedClues };
 }
 
 function removeHTML(htmlString) {
   let parser = new DOMParser();
-  return parser
-    .parseFromString(htmlString, "text/html")
-    .body.textContent.toUpperCase();
+  return parser.parseFromString(htmlString, "text/html").body.textContent;
 }
 
 /** Return object with data about a category:
@@ -125,7 +123,6 @@ async function fillTable() {
     for (let y = 0; y < NUM_CATEGORIES; y++) {
       const $clue = $(`<td class="clue">?</td>`);
       $clue.data({ categoryIndex: y, clueIndex: x });
-      //$clue.on("click", handleClick);
       $questionRow.append($clue);
     }
     $tableBody.append($questionRow);
@@ -163,14 +160,15 @@ function handleClick(evt) {
  * and update the button used to fetch data.
  */
 
-/** Note - implemented here for completeness, but showLoadingView and 
+/** Note - implemented here for completeness, but showLoadingView and
  *  hideLoadingView could be simplified by using the jQuery toggle()
- *  function on both the table and the loading spinner in a single
+ *  function on the elements changing visibility in a single
  *  toggleLoadingState() function instead.
- * 
+ *
  */
 function showLoadingView() {
   $("#jeopardy").hide();
+  $("#restart").hide();
   $(".loading").show();
 }
 
@@ -178,6 +176,7 @@ function showLoadingView() {
 
 function hideLoadingView() {
   $("#jeopardy").show();
+  $("#restart").show();
   $(".loading").hide();
 }
 
@@ -188,37 +187,43 @@ function hideLoadingView() {
  * - create HTML table
  * */
 
-/** Note - normally, I would create the button in the HTML file instead of 
+/** Note - normally, I would create the button in the HTML file instead of
  *  in the JS code, however the given instructions state:
- *    "We’ve provided an HTML file and CSS for the application 
- *     (you shouldn’t change the HTML file; if you want to tweak 
+ *    "We’ve provided an HTML file and CSS for the application
+ *     (you shouldn’t change the HTML file; if you want to tweak
  *     any CSS things, feel free to)."
  */
 async function setupAndStart() {
-  await getCategoryIDs();
-  const $gameTable = $('<table id="jeopardy">');
-  const $restartButton = $('<button id="restart">Restart</button>');
-  const $loadingCircle = $(`<div class="loading">`).hide();
-  $restartButton.on("click", restart);
-  $("body").append([$loadingCircle, $gameTable, $restartButton]);
-  fillTable();
+  const $loadingCircle = $(`<div class="loading">`);
+  $("body").append($loadingCircle);
+  await getCategoryIDs().then(function () {
+    const $gameTable = $('<table id="jeopardy">').hide();
+    const $restartButton = $('<button id="restart">Restart</button>').hide();
+    $restartButton.on("click", restart);
+    $("body").append([$gameTable, $restartButton]);
+    fillTable();
+    hideLoadingView();
+  });
 }
 
 /** On click of start / restart button, set up game. */
 
 async function restart() {
-  await getCategoryIDs();
+  showLoadingView();
   $("#jeopardy").empty();
-  fillTable();
+  await getCategoryIDs().then(function () {
+    fillTable();
+    hideLoadingView();
+  });
 }
 
 /** On page load, add event handler for clicking clues */
 
 /** Note - this could have been done using a listener for the "load" or
  * "DOMContentLoaded" events to trigger adding the event handler. I opted
- *  to use event delegation instead, as it means only one event handler is 
+ *  to use event delegation instead, as it means only one event handler is
  *  needed, rather than adding one handler to trigger adding another.
-*/
+ */
 $("body").on("click", ".clue", handleClick);
 
 setupAndStart();
