@@ -5,6 +5,7 @@
   #8d2ab5
   #74119c
 */
+@import url('https://fonts.googleapis.com/css2?family=Stoke');
 
 .loading {
   border: 1rem solid #939393;
@@ -27,17 +28,22 @@
 
 table{
   margin: .5rem auto;
+  font-family: "Stoke", "Times New Roman", serif;
+  font-size: 0.8rem;
+  text-shadow: 1px 1px black;
 }
 
 .category-title {
   font-weight: bold;
-  height: 5rem;
+  height: 4rem;
+  font-size: 1rem;
 }
 
 td {
-  background-color: #115ff4;
+  background-color: #060ce9;
   color: antiquewhite;
   text-align: center;
   width: 14rem;
-  height: 7.5rem;
+  height: 6.5rem;
+  padding: 0.5rem;
 }

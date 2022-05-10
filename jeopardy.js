@@ -74,12 +74,14 @@ function shortenCategory(categoryObj) {
       showing: null,
     });
   }
-  return { title: removeHTML(title).toUpperCase(), clues: shortenedClues };
+  return { title: removeHTML(title), clues: shortenedClues };
 }
 
 function removeHTML(htmlString) {
   let parser = new DOMParser();
-  return parser.parseFromString(htmlString, "text/html").body.textContent;
+  return parser
+    .parseFromString(htmlString, "text/html")
+    .body.textContent.toUpperCase();
 }
 
 /** Return object with data about a category:
@@ -195,6 +197,7 @@ function hideLoadingView() {
  */
 async function setupAndStart() {
   const $loadingCircle = $(`<div class="loading">`);
+  <link href="https://fonts.googleapis.com/css2?family=Stoke" rel="stylesheet"></link>
   $("body").append($loadingCircle);
   await getCategoryIDs().then(function () {
     const $gameTable = $('<table id="jeopardy">').hide();
