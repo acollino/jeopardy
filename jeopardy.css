@@ -5,3 +5,39 @@
   #8d2ab5
   #74119c
 */
+
+.loading {
+  border: 1rem solid #939393;
+  border-top: 1rem solid #494949;
+  border-radius: 50%;
+  width: 10rem;
+  height: 10rem;
+  animation: spin 3s linear infinite;
+  margin: 4rem auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+table{
+  margin: .5rem auto;
+}
+
+.category-title {
+  font-weight: bold;
+  height: 5rem;
+}
+
+td {
+  background-color: #115ff4;
+  color: antiquewhite;
+  text-align: center;
+  width: 14rem;
+  height: 7.5rem;
+}
