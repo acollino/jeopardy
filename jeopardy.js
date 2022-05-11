@@ -153,7 +153,7 @@ function handleClick(evt) {
     return;
   } else if (clueInfo.showing === "question") {
     clueInfo.showing = "answer";
-    const $back = $(`<div class="back">⮌</div>`).on("click", backToQuestion);
+    const $back = $(`<div class="back">←</div>`).on("click", backToQuestion);
     $clue
       .removeClass("question")
       .addClass("answer")
