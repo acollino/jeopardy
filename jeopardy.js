@@ -124,8 +124,7 @@ async function fillTable() {
     const $questionRow = $("<tr>");
     for (let y = 0; y < NUM_CATEGORIES; y++) {
       const $clue = $(`<td class="clue">?</td>`);
-      $clue.addClass("unclicked");
-      $clue.data({ categoryIndex: y, clueIndex: x });
+      $clue.addClass("unclicked").data({ categoryIndex: y, clueIndex: x });
       $questionRow.append($clue);
     }
     $tableBody.append($questionRow);
@@ -150,16 +149,16 @@ function handleClick(evt) {
     return;
   } else if (clueInfo.showing === null) {
     clueInfo.showing = "question";
-    $clue.removeClass("unclicked").addClass("question");
-    $clue.text(clueInfo.question);
+    $clue.removeClass("unclicked").addClass("question").text(clueInfo.question);
     return;
   } else if (clueInfo.showing === "question") {
-    $clue.removeClass("question").addClass("answer");
     clueInfo.showing = "answer";
-    $clue.text(clueInfo.answer);
-    const $back = $(`<div class="back">⮌</div>`);
-    $back.on("click", backToQuestion);
-    $clue.append($back);
+    const $back = $(`<div class="back">⮌</div>`).on("click", backToQuestion);
+    $clue
+      .removeClass("question")
+      .addClass("answer")
+      .text(clueInfo.answer)
+      .append($back);
     return;
   }
 }
