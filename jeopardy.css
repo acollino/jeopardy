@@ -5,3 +5,104 @@
   #8d2ab5
   #74119c
 */
+@import url('https://fonts.googleapis.com/css2?family=Stoke');
+
+.loading {
+  border: 1rem solid #4858a6;
+  border-top: 1rem solid #101f77;
+  border-radius: 50%;
+  width: 10rem;
+  height: 10rem;
+  animation: spin 1s linear infinite;
+  margin: 36vh auto 0 auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+html {
+  background-image: linear-gradient(#010c49, #0025a9, #536ffc, #e9a288, #536ffc, #0025a9, #041b9a);
+  background-attachment: fixed;
+}
+
+table{
+  background-color: white;  
+  margin: .5rem auto;
+  font-family: "Stoke", "Times New Roman", serif;
+  font-size: 0.75rem;
+  text-shadow: 1px 1px 2px black;
+}
+
+.category-title {
+  font-family: Impact, 'Arial Narrow Bold', sans-serif;
+  height: 4rem;
+  font-size: 1.5rem;
+}
+
+td {
+  background-color: #070db3;
+  border: 0.25rem solid #070db3;
+  color: antiquewhite;
+  text-align: center;
+  width: 14rem;
+  height: 6.5rem;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.unclicked:hover, .question:hover{
+  border: 0.25rem solid rgb(255, 208, 0);
+  filter: brightness(120%);
+}
+
+.unclicked:active, .question:active{
+  filter: brightness(80%);
+}
+
+.unclicked {
+  font-size: 4.5rem;
+  font-weight: bold;
+}
+
+.back{
+  background-color: rgb(29, 157, 48);
+  width: 1rem;
+  position: absolute;
+  top: -0.25rem;
+  left: -0.25rem;
+}
+
+.back:hover{
+  filter: brightness(140%);
+  user-select: none;
+}
+
+#restart {
+  display: block;
+  color: rgb(227, 227, 227);
+  background-color: rgb(182, 28, 28);
+  text-shadow: 0 0 1rem black;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  border-style: none;
+  box-shadow: 0.1rem 0.2rem rgb(16, 16, 16);
+  font-size: 1.5rem;
+  margin: 1rem auto;
+}
+
+#restart:hover {
+  filter: brightness(115%);
+}
+
+#restart:active {
+  filter: brightness(75%);
+  box-shadow: 0.05rem 0.1rem rgb(16, 16, 16);
+  transform: translate(0.05rem, 0.1rem);
+}
