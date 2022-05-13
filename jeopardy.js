@@ -20,47 +20,90 @@
 
 const NUM_CATEGORIES = 6;
 const NUM_QUESTIONS_PER_CAT = 5;
+
+/** From testing with the jService API, category IDs start at 1 and
+ *  end at 18418.
+ *  check for failed GET - had one at 11511
+ */
 const NUM_API_CATEGORIES = 18418;
 const categorySet = new Set();
 
 let categories = [];
 
-/** Get NUM_CATEGORIES random category from API.
- *
- * Returns array of category ids
- */
-
-async function getCategoryIDs() {
-  for (let x = 0; x < NUM_CATEGORIES; x++) {
-    let categoryObj = await getCategory(getRandomID());
-    verifyCategory(categoryObj)
-      ? (categories[x] = shortenCategory(categoryObj))
-      : x--;
-  }
-  return categories;
-}
-
-/** From testing with the jService API, category IDs start at 1 and
- *  end at 18418.
- */
-function getRandomID() {
-  let randomID = 1 + Math.floor(Math.random() * NUM_API_CATEGORIES);
-  while (categorySet.has(randomID)) {
-    randomID = 1 + Math.floor(Math.random() * NUM_API_CATEGORIES);
-  }
-  return randomID;
-}
-
-/** Ensures that the given category has enough clues for the set number
- *  of game rows, and that the clues are not invalid (ie rely on in-person
- *  tips like pictures or sounds).
- */
-function verifyCategory(categoryObj) {
-  let enoughGameClues = categoryObj.clues_count >= NUM_QUESTIONS_PER_CAT;
-  let noInvalidClues = categoryObj.clues.every((element) => {
-    return element.invalid_count === null && element.question !== "";
+function getCategoriesFromIDSet(categoryIDSet) {
+  let categoryArray = [];
+  categoryIDSet.forEach((id) => {
+    categoryArray.push(getCategory(id));
   });
-  return enoughGameClues && noInvalidClues;
+  return Promise.all(categoryArray);
+}
+
+function getCategory(categoryID) {
+  return fetch(`https://jservice.io/api/category?id=${categoryID}`)
+    .then((response) => response.json())
+    .catch(() => { return { category: "", id: -1, clues: [] }; });
+}
+
+function getRandomIDSet(numIDs, maxValue, validityObj) {
+  let uniqueIDSet = new Set();
+  while (uniqueIDSet.size < numIDs) {
+    let randomID = 1 + Math.floor(Math.random() * maxValue);
+    if (
+      !uniqueIDSet.has(randomID) &&
+      !validityObj.validIDSet.has(randomID) &&
+      !validityObj.invalidIDSet.has(randomID)
+    ) {
+      uniqueIDSet.add(randomID);
+    }
+  }
+  return uniqueIDSet;
+}
+
+function getUniqueClues(category) {
+  let validClueArray = category.clues.filter((clue) => clue.question !== "");
+  let uniqueClueQuestionSet = new Set();
+  let uniqueClueIDSet = new Set();
+  validClueArray.forEach((clue) => {
+    if (!uniqueClueQuestionSet.has(clue.question)) {
+      uniqueClueQuestionSet.add(clue.question);
+      uniqueClueIDSet.add(clue.id);
+    }
+  });
+  return validClueArray.filter((clue) => uniqueClueIDSet.has(clue.id));
+}
+
+function filterCategories(categoryArray, numClues, validityObj) {
+  let filteredCategories = [];
+  categoryArray.forEach((category) => {
+    let uniqueClues = getUniqueClues(category);
+    if (uniqueClues.length >= numClues) {
+      validityObj.validIDSet.add(category.id);
+      let uniqueCategory = { title: category.title, clues: uniqueClues };
+      filteredCategories.push(shortenCategory(uniqueCategory));
+    } else {
+      validityObj.invalidIDSet.add(category.id);
+    }
+  });
+  return filteredCategories;
+}
+
+async function getValidCategories(amountCategories, validityObj) {
+  let idSet = getRandomIDSet(amountCategories, NUM_API_CATEGORIES, validityObj);
+  let categories = await getCategoriesFromIDSet(idSet);
+  return filterCategories(categories, NUM_QUESTIONS_PER_CAT, validityObj);
+}
+
+async function fillValidCategoryArray() {
+  let amountCategories = NUM_CATEGORIES;
+  let validityObj = { validIDSet: new Set(), invalidIDSet: new Set() };
+  let filtered = await getValidCategories(amountCategories, validityObj);
+  while (filtered.length < NUM_CATEGORIES) {
+    let missingCategoryNum = NUM_CATEGORIES - filtered.length;
+    filtered = filtered.concat(
+      await getValidCategories(missingCategoryNum, validityObj)
+    );
+  }
+  categories = filtered;
 }
 
 function shortenCategory(categoryObj) {
@@ -82,25 +125,6 @@ function removeHTML(htmlString) {
   return parser
     .parseFromString(htmlString, "text/html")
     .body.textContent.toUpperCase();
-}
-
-/** Return object with data about a category:
- *
- *  Returns { title: "Math", clues: clue-array }
- *
- * Where clue-array is:
- *   [
- *      {question: "Hamlet Author", answer: "Shakespeare", showing: null},
- *      {question: "Bell Jar Author", answer: "Plath", showing: null},
- *      ...
- *   ]
- */
-
-async function getCategory(catId) {
-  let categoryObj = await fetch(
-    `https://jservice.io/api/category?id=${catId}`
-  ).then((response) => response.json());
-  return categoryObj;
 }
 
 /** Fill the HTML table#jeopardy with the categories & cells for questions.
@@ -153,7 +177,7 @@ function handleClick(evt) {
     return;
   } else if (clueInfo.showing === "question") {
     clueInfo.showing = "answer";
-    const $back = $(`<div class="back">←</div>`).on("click", backToQuestion);
+    const $back = $(`<div class="back">◀</div>`).on("click", backToQuestion);
     $clue
       .removeClass("question")
       .addClass("answer")
@@ -213,7 +237,8 @@ function hideLoadingView() {
 async function setupAndStart() {
   const $loadingCircle = $(`<div class="loading">`);
   $("body").append($loadingCircle);
-  await getCategoryIDs().then(function () {
+  // await getCategoryIDs().then(function () {
+  await fillValidCategoryArray().then(function () {
     const $gameTable = $('<table id="jeopardy">').hide();
     const $restartButton = $('<button id="restart">Restart</button>').hide();
     $restartButton.on("click", restart);
@@ -228,7 +253,8 @@ async function setupAndStart() {
 async function restart() {
   showLoadingView();
   $("#jeopardy").empty();
-  await getCategoryIDs().then(function () {
+  // await getCategoryIDs().then(function () {
+    await fillValidCategoryArray().then(function () {
     fillTable();
     hideLoadingView();
   });
@@ -244,3 +270,6 @@ async function restart() {
 $("body").on("click", ".clue", handleClick);
 
 setupAndStart();
+
+//TODO
+//randomly select clues from the category if over the nums wanted
