@@ -18,8 +18,8 @@
 //    ...
 //  ]
 
-const NUM_CATEGORIES = 2;
-const NUM_QUESTIONS_PER_CAT = 3;
+const NUM_CATEGORIES = 6;
+const NUM_QUESTIONS_PER_CAT = 5;
 
 /** From testing with the jService API, category IDs start at 1 and
  *  end at 18418.
