@@ -18,15 +18,18 @@
 //    ...
 //  ]
 
-const NUM_CATEGORIES = 6;
-const NUM_QUESTIONS_PER_CAT = 5;
+const NUM_CATEGORIES = 2;
+const NUM_QUESTIONS_PER_CAT = 3;
 
 /** From testing with the jService API, category IDs start at 1 and
  *  end at 18418.
- *  check for failed GET - had one at 11511
  */
 const NUM_API_CATEGORIES = 18418;
-const categorySet = new Set();
+const categoryIDSet = new Set();
+
+/** From testing with the jService API, clue values cap at 1000
+ */
+const NUM_MAX_CLUE_VALUE = 1000;
 
 let categories = [];
 
@@ -41,18 +44,16 @@ function getCategoriesFromIDSet(categoryIDSet) {
 function getCategory(categoryID) {
   return fetch(`https://jservice.io/api/category?id=${categoryID}`)
     .then((response) => response.json())
-    .catch(() => { return { category: "", id: -1, clues: [] }; });
+    .catch(() => {
+      return { category: "", id: -1, clues: [] };
+    });
 }
 
-function getRandomIDSet(numIDs, maxValue, validityObj) {
+function getRandomIDSet(numIDs, maxValue) {
   let uniqueIDSet = new Set();
   while (uniqueIDSet.size < numIDs) {
     let randomID = 1 + Math.floor(Math.random() * maxValue);
-    if (
-      !uniqueIDSet.has(randomID) &&
-      !validityObj.validIDSet.has(randomID) &&
-      !validityObj.invalidIDSet.has(randomID)
-    ) {
+    if (!categoryIDSet.has(randomID)) {
       uniqueIDSet.add(randomID);
     }
   }
@@ -60,7 +61,9 @@ function getRandomIDSet(numIDs, maxValue, validityObj) {
 }
 
 function getUniqueClues(category) {
-  let validClueArray = category.clues.filter((clue) => clue.question !== "");
+  let validClueArray = category.clues.filter((clue) => {
+    return clue.question !== "" && clue.invalid_count === null;
+  });
   let uniqueClueQuestionSet = new Set();
   let uniqueClueIDSet = new Set();
   validClueArray.forEach((clue) => {
@@ -72,48 +75,87 @@ function getUniqueClues(category) {
   return validClueArray.filter((clue) => uniqueClueIDSet.has(clue.id));
 }
 
-function filterCategories(categoryArray, numClues, validityObj) {
+function sortClueDifficulty(clueArray) {
+  let difficultyIncreaseValue = NUM_MAX_CLUE_VALUE / NUM_QUESTIONS_PER_CAT;
+  let clueMap = new Map();
+  clueArray.forEach((clue) => {
+    let index = Math.round(Number(clue.value) / difficultyIncreaseValue);
+    if (!clueMap.has(index)) {
+      clueMap.set(index, []);
+    }
+    clueMap.get(index).push(clue);
+  });
+  return clueMap;
+}
+
+function hardestCluesFromIndex(index, sortedClueMap) {
+  let counter = index;
+  while (!sortedClueMap.has(counter) && counter > 0) {
+    counter--;
+  }
+  let cluesFromIndex = sortedClueMap.get(counter);
+  if (cluesFromIndex.length === 1) {
+    sortedClueMap.delete(counter);
+  }
+  return cluesFromIndex;
+}
+
+function getRandomClueFromIndex(index, sortedClueMap) {
+  let cluesFromIndex = hardestCluesFromIndex(index, sortedClueMap);
+  let randomClueIndex = Math.floor(Math.random() * cluesFromIndex.length);
+  return cluesFromIndex.splice(randomClueIndex, 1)[0];
+}
+
+function buildClueArray(sortedClueMap) {
+  let clueArray = Array.from({ length: NUM_QUESTIONS_PER_CAT });
+  for (let x = 0; x < clueArray.length; x++) {
+    clueArray[x] = getRandomClueFromIndex(x + 1, sortedClueMap);
+  }
+  return clueArray;
+}
+
+function filterCategories(categoryArray, numClues,) {
   let filteredCategories = [];
   categoryArray.forEach((category) => {
     let uniqueClues = getUniqueClues(category);
     if (uniqueClues.length >= numClues) {
-      validityObj.validIDSet.add(category.id);
-      let uniqueCategory = { title: category.title, clues: uniqueClues };
+      let clues = buildClueArray(sortClueDifficulty(category.clues));
+      categoryIDSet.add(category.id);
+      let uniqueCategory = { title: category.title, clues };
       filteredCategories.push(shortenCategory(uniqueCategory));
-    } else {
-      validityObj.invalidIDSet.add(category.id);
     }
   });
   return filteredCategories;
 }
 
-async function getValidCategories(amountCategories, validityObj) {
-  let idSet = getRandomIDSet(amountCategories, NUM_API_CATEGORIES, validityObj);
-  let categories = await getCategoriesFromIDSet(idSet);
-  return filterCategories(categories, NUM_QUESTIONS_PER_CAT, validityObj);
+async function getValidCategories(amountCategories) {
+  let idSet = getRandomIDSet(amountCategories, NUM_API_CATEGORIES);
+  let categoriesFromID = await getCategoriesFromIDSet(idSet);
+  return filterCategories(categoriesFromID, NUM_QUESTIONS_PER_CAT);
 }
 
 async function fillValidCategoryArray() {
+  console.time("getting data");
   let amountCategories = NUM_CATEGORIES;
-  let validityObj = { validIDSet: new Set(), invalidIDSet: new Set() };
-  let filtered = await getValidCategories(amountCategories, validityObj);
-  while (filtered.length < NUM_CATEGORIES) {
-    let missingCategoryNum = NUM_CATEGORIES - filtered.length;
-    filtered = filtered.concat(
-      await getValidCategories(missingCategoryNum, validityObj)
+  categories = await getValidCategories(amountCategories);
+  while (categories.length < NUM_CATEGORIES) {
+    let missingCategoryNum = NUM_CATEGORIES - categories.length;
+    categories = categories.concat(
+      await getValidCategories(missingCategoryNum)
     );
   }
-  categories = filtered;
+  console.timeEnd("getting data");
 }
 
 function shortenCategory(categoryObj) {
   let { title, clues } = categoryObj;
   let shortenedClues = [];
   for (let clue of clues) {
-    let { question, answer } = clue;
+    let { question, answer, value } = clue;
     shortenedClues.push({
       question: removeHTML(question),
       answer: removeHTML(answer),
+      value,
       showing: null,
     });
   }
@@ -124,7 +166,8 @@ function removeHTML(htmlString) {
   let parser = new DOMParser();
   return parser
     .parseFromString(htmlString, "text/html")
-    .body.textContent.toUpperCase();
+    .body.textContent.toUpperCase()
+    .replace("\\'", "'");
 }
 
 /** Fill the HTML table#jeopardy with the categories & cells for questions.
@@ -237,7 +280,6 @@ function hideLoadingView() {
 async function setupAndStart() {
   const $loadingCircle = $(`<div class="loading">`);
   $("body").append($loadingCircle);
-  // await getCategoryIDs().then(function () {
   await fillValidCategoryArray().then(function () {
     const $gameTable = $('<table id="jeopardy">').hide();
     const $restartButton = $('<button id="restart">Restart</button>').hide();
@@ -253,8 +295,8 @@ async function setupAndStart() {
 async function restart() {
   showLoadingView();
   $("#jeopardy").empty();
-  // await getCategoryIDs().then(function () {
-    await fillValidCategoryArray().then(function () {
+  categoryIDSet.clear();
+  await fillValidCategoryArray().then(function () {
     fillTable();
     hideLoadingView();
   });
@@ -270,6 +312,3 @@ async function restart() {
 $("body").on("click", ".clue", handleClick);
 
 setupAndStart();
-
-//TODO
-//randomly select clues from the category if over the nums wanted
