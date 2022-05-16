@@ -27,13 +27,13 @@
 }
 
 html {
-  background-image: linear-gradient(#010c49, #0025a9, #536ffc, #e9a288, #536ffc, #0025a9, #041b9a);
+  background-image: linear-gradient(#010c49, #0025a9, #536ffc, #e9a288, #536ffc, #0025a9, #010c49);
   background-attachment: fixed;
 }
 
 table{
   background-color: white;  
-  margin: .5rem auto;
+  margin: 1.5rem auto;
   font-family: "Stoke", "Times New Roman", serif;
   font-size: 0.75rem;
   text-shadow: 1px 1px 2px black;
@@ -67,7 +67,7 @@ td {
 }
 
 .unclicked {
-  font-size: 4.5rem;
+  font-size: 3.75rem;
   font-weight: bold;
 }
 
