@@ -20,57 +20,142 @@
 
 const NUM_CATEGORIES = 6;
 const NUM_QUESTIONS_PER_CAT = 5;
-const NUM_API_CATEGORIES = 18418;
-const categorySet = new Set();
-
-let categories = [];
-
-/** Get NUM_CATEGORIES random category from API.
- *
- * Returns array of category ids
- */
-
-async function getCategoryIDs() {
-  for (let x = 0; x < NUM_CATEGORIES; x++) {
-    let categoryObj = await getCategory(getRandomID());
-    verifyCategory(categoryObj)
-      ? (categories[x] = shortenCategory(categoryObj))
-      : x--;
-  }
-  return categories;
-}
 
 /** From testing with the jService API, category IDs start at 1 and
  *  end at 18418.
  */
-function getRandomID() {
-  let randomID = 1 + Math.floor(Math.random() * NUM_API_CATEGORIES);
-  while (categorySet.has(randomID)) {
-    randomID = 1 + Math.floor(Math.random() * NUM_API_CATEGORIES);
-  }
-  return randomID;
+const NUM_API_CATEGORIES = 18418;
+const categoryIDSet = new Set();
+
+/** From testing with the jService API, clue values cap at 1000
+ */
+const NUM_MAX_CLUE_VALUE = 1000;
+
+let categories = [];
+
+function getCategoriesFromIDSet(categoryIDSet) {
+  let categoryArray = [];
+  categoryIDSet.forEach((id) => {
+    categoryArray.push(getCategory(id));
+  });
+  return Promise.all(categoryArray);
 }
 
-/** Ensures that the given category has enough clues for the set number
- *  of game rows, and that the clues are not invalid (ie rely on in-person
- *  tips like pictures or sounds).
- */
-function verifyCategory(categoryObj) {
-  let enoughGameClues = categoryObj.clues_count >= NUM_QUESTIONS_PER_CAT;
-  let noInvalidClues = categoryObj.clues.every((element) => {
-    return element.invalid_count === null && element.question !== "";
+function getCategory(categoryID) {
+  return fetch(`https://jservice.io/api/category?id=${categoryID}`)
+    .then((response) => response.json())
+    .catch(() => {
+      return { category: "", id: -1, clues: [] };
+    });
+}
+
+function getRandomIDSet(numIDs, maxValue) {
+  let uniqueIDSet = new Set();
+  while (uniqueIDSet.size < numIDs) {
+    let randomID = 1 + Math.floor(Math.random() * maxValue);
+    if (!categoryIDSet.has(randomID)) {
+      uniqueIDSet.add(randomID);
+    }
+  }
+  return uniqueIDSet;
+}
+
+function getUniqueClues(category) {
+  let validClueArray = category.clues.filter((clue) => {
+    return clue.question !== "" && clue.invalid_count === null;
   });
-  return enoughGameClues && noInvalidClues;
+  let uniqueClueQuestionSet = new Set();
+  let uniqueClueIDSet = new Set();
+  validClueArray.forEach((clue) => {
+    if (!uniqueClueQuestionSet.has(clue.question)) {
+      uniqueClueQuestionSet.add(clue.question);
+      uniqueClueIDSet.add(clue.id);
+    }
+  });
+  return validClueArray.filter((clue) => uniqueClueIDSet.has(clue.id));
+}
+
+function sortClueDifficulty(clueArray) {
+  let difficultyIncreaseValue = NUM_MAX_CLUE_VALUE / NUM_QUESTIONS_PER_CAT;
+  let clueMap = new Map();
+  clueArray.forEach((clue) => {
+    let index = Math.round(Number(clue.value) / difficultyIncreaseValue);
+    if (!clueMap.has(index)) {
+      clueMap.set(index, []);
+    }
+    clueMap.get(index).push(clue);
+  });
+  return clueMap;
+}
+
+function hardestCluesFromIndex(index, sortedClueMap) {
+  let counter = index;
+  while (!sortedClueMap.has(counter) && counter > 0) {
+    counter--;
+  }
+  let cluesFromIndex = sortedClueMap.get(counter);
+  if (cluesFromIndex.length === 1) {
+    sortedClueMap.delete(counter);
+  }
+  return cluesFromIndex;
+}
+
+function getRandomClueFromIndex(index, sortedClueMap) {
+  let cluesFromIndex = hardestCluesFromIndex(index, sortedClueMap);
+  let randomClueIndex = Math.floor(Math.random() * cluesFromIndex.length);
+  return cluesFromIndex.splice(randomClueIndex, 1)[0];
+}
+
+function buildClueArray(sortedClueMap) {
+  let clueArray = Array.from({ length: NUM_QUESTIONS_PER_CAT });
+  for (let x = 0; x < clueArray.length; x++) {
+    clueArray[x] = getRandomClueFromIndex(x + 1, sortedClueMap);
+  }
+  return clueArray;
+}
+
+function filterCategories(categoryArray, numClues,) {
+  let filteredCategories = [];
+  categoryArray.forEach((category) => {
+    let uniqueClues = getUniqueClues(category);
+    if (uniqueClues.length >= numClues) {
+      let clues = buildClueArray(sortClueDifficulty(category.clues));
+      categoryIDSet.add(category.id);
+      let uniqueCategory = { title: category.title, clues };
+      filteredCategories.push(shortenCategory(uniqueCategory));
+    }
+  });
+  return filteredCategories;
+}
+
+async function getValidCategories(amountCategories) {
+  let idSet = getRandomIDSet(amountCategories, NUM_API_CATEGORIES);
+  let categoriesFromID = await getCategoriesFromIDSet(idSet);
+  return filterCategories(categoriesFromID, NUM_QUESTIONS_PER_CAT);
+}
+
+async function fillValidCategoryArray() {
+  console.time("getting data");
+  let amountCategories = NUM_CATEGORIES;
+  categories = await getValidCategories(amountCategories);
+  while (categories.length < NUM_CATEGORIES) {
+    let missingCategoryNum = NUM_CATEGORIES - categories.length;
+    categories = categories.concat(
+      await getValidCategories(missingCategoryNum)
+    );
+  }
+  console.timeEnd("getting data");
 }
 
 function shortenCategory(categoryObj) {
   let { title, clues } = categoryObj;
   let shortenedClues = [];
   for (let clue of clues) {
-    let { question, answer } = clue;
+    let { question, answer, value } = clue;
     shortenedClues.push({
       question: removeHTML(question),
       answer: removeHTML(answer),
+      value,
       showing: null,
     });
   }
@@ -81,26 +166,8 @@ function removeHTML(htmlString) {
   let parser = new DOMParser();
   return parser
     .parseFromString(htmlString, "text/html")
-    .body.textContent.toUpperCase();
-}
-
-/** Return object with data about a category:
- *
- *  Returns { title: "Math", clues: clue-array }
- *
- * Where clue-array is:
- *   [
- *      {question: "Hamlet Author", answer: "Shakespeare", showing: null},
- *      {question: "Bell Jar Author", answer: "Plath", showing: null},
- *      ...
- *   ]
- */
-
-async function getCategory(catId) {
-  let categoryObj = await fetch(
-    `https://jservice.io/api/category?id=${catId}`
-  ).then((response) => response.json());
-  return categoryObj;
+    .body.textContent.toUpperCase()
+    .replace("\\'", "'");
 }
 
 /** Fill the HTML table#jeopardy with the categories & cells for questions.
@@ -153,7 +220,7 @@ function handleClick(evt) {
     return;
   } else if (clueInfo.showing === "question") {
     clueInfo.showing = "answer";
-    const $back = $(`<div class="back">⮌</div>`).on("click", backToQuestion);
+    const $back = $(`<div class="back">◀</div>`).on("click", backToQuestion);
     $clue
       .removeClass("question")
       .addClass("answer")
@@ -213,7 +280,7 @@ function hideLoadingView() {
 async function setupAndStart() {
   const $loadingCircle = $(`<div class="loading">`);
   $("body").append($loadingCircle);
-  await getCategoryIDs().then(function () {
+  await fillValidCategoryArray().then(function () {
     const $gameTable = $('<table id="jeopardy">').hide();
     const $restartButton = $('<button id="restart">Restart</button>').hide();
     $restartButton.on("click", restart);
@@ -228,7 +295,8 @@ async function setupAndStart() {
 async function restart() {
   showLoadingView();
   $("#jeopardy").empty();
-  await getCategoryIDs().then(function () {
+  categoryIDSet.clear();
+  await fillValidCategoryArray().then(function () {
     fillTable();
     hideLoadingView();
   });
