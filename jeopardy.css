@@ -87,7 +87,7 @@ td {
 #restart {
   display: block;
   color: rgb(227, 227, 227);
-  background-color: rgb(182, 28, 28);
+  background-color: rgb(145, 23, 23);
   text-shadow: 0 0 1rem black;
   border-radius: 0.25rem;
   padding: 0.5rem;
@@ -95,10 +95,13 @@ td {
   box-shadow: 0.1rem 0.2rem rgb(16, 16, 16);
   font-size: 1.5rem;
   margin: 1rem auto;
+  transition: 100ms;
 }
 
 #restart:hover {
-  filter: brightness(115%);
+  filter: brightness(110%);
+  transform: translate(-0.1rem, -0.2rem);
+  box-shadow: 0.2rem 0.4rem rgb(16 16 16);
 }
 
 #restart:active {
