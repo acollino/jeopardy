@@ -114,7 +114,7 @@ function buildClueArray(sortedClueMap) {
   return clueArray;
 }
 
-function filterCategories(categoryArray, numClues,) {
+function filterCategories(categoryArray, numClues) {
   let filteredCategories = [];
   categoryArray.forEach((category) => {
     let uniqueClues = getUniqueClues(category);
@@ -209,35 +209,32 @@ async function fillTable() {
  * */
 
 function handleClick(evt) {
-  const $clue = $(evt.target);
+  const $clue = $(evt.target).closest(".clue");
   let { categoryIndex, clueIndex } = $clue.data();
   let clueInfo = categories[categoryIndex].clues[clueIndex];
-  if (clueInfo.showing === "answer") {
+  if (clueInfo.showing === null) {
+    clueInfo.showing = "flipQandA";
+    $clue.addClass("shrink");
+    $clue.on("animationiteration", () => {
+      $clue.removeClass("unclicked").addClass("clue-q-and-a").text("");
+      addFaces($clue, clueInfo);
+    });
+    $clue.on("animationend", () => {
+      $clue.removeClass(["shrink"]);
+    });
     return;
-  } else if (clueInfo.showing === null) {
-    clueInfo.showing = "question";
-    $clue.removeClass("unclicked").addClass("question").text(clueInfo.question);
-    return;
-  } else if (clueInfo.showing === "question") {
-    clueInfo.showing = "answer";
-    const $back = $(`<div class="back">◀</div>`).on("click", backToQuestion);
-    $clue
-      .removeClass("question")
-      .addClass("answer")
-      .text(clueInfo.answer)
-      .append($back);
+  } else if (clueInfo.showing === "flipQandA") {
+    $clue.toggleClass("flip");
     return;
   }
 }
 
-function backToQuestion(evt) {
-  const $back = $(evt.target);
-  const $clue = $back.parent();
-  $clue.removeClass("answer");
-  let { categoryIndex, clueIndex } = $clue.data();
-  let clueInfo = categories[categoryIndex].clues[clueIndex];
-  clueInfo.showing = null;
-  $clue.click();
+function addFaces($clue, clueInfo) {
+  let $faceFront = $('<div class="face">');
+  $faceFront.text(clueInfo.question);
+  let $faceBack = $('<div class="face">');
+  $faceBack.text(clueInfo.answer);
+  $clue.append([$faceFront, $faceBack]);
 }
 
 /** Wipe the current Jeopardy board, show the loading spinner,
@@ -312,3 +309,11 @@ async function restart() {
 $("body").on("click", ".clue", handleClick);
 
 setupAndStart();
+
+
+//todo:
+//fix choosing clues bug - rn, depends on having at least one clue in each
+//value category to guarantee uniqueness. found on ID 18170, where 800 value 
+//is instead null.
+//button - shadow - expand or blur edges
+//value numbers?
