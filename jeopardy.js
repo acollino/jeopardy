@@ -119,7 +119,7 @@ function filterCategories(categoryArray, numClues) {
   categoryArray.forEach((category) => {
     let uniqueClues = getUniqueClues(category);
     if (uniqueClues.length >= numClues) {
-      let clues = buildClueArray(sortClueDifficulty(category.clues));
+      let clues = buildClueArray(sortClueDifficulty(uniqueClues));
       categoryIDSet.add(category.id);
       let uniqueCategory = { title: category.title, clues };
       filteredCategories.push(shortenCategory(uniqueCategory));
@@ -134,7 +134,7 @@ async function getValidCategories(amountCategories) {
   return filterCategories(categoriesFromID, NUM_QUESTIONS_PER_CAT);
 }
 
-async function fillValidCategoryArray() {
+async function fillArrayWithValidCategories() {
   console.time("getting data");
   let amountCategories = NUM_CATEGORIES;
   categories = await getValidCategories(amountCategories);
@@ -277,7 +277,7 @@ function hideLoadingView() {
 async function setupAndStart() {
   const $loadingCircle = $(`<div class="loading">`);
   $("body").append($loadingCircle);
-  await fillValidCategoryArray().then(function () {
+  await fillArrayWithValidCategories().then(function () {
     const $gameTable = $('<table id="jeopardy">').hide();
     const $restartButton = $('<button id="restart">Restart</button>').hide();
     $restartButton.on("click", restart);
@@ -293,7 +293,7 @@ async function restart() {
   showLoadingView();
   $("#jeopardy").empty();
   categoryIDSet.clear();
-  await fillValidCategoryArray().then(function () {
+  await fillArrayWithValidCategories().then(function () {
     fillTable();
     hideLoadingView();
   });
