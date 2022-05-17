@@ -189,8 +189,10 @@ async function fillTable() {
   }
   for (let x = 0; x < NUM_QUESTIONS_PER_CAT; x++) {
     const $questionRow = $("<tr>");
+    let displayValue = (NUM_MAX_CLUE_VALUE / NUM_QUESTIONS_PER_CAT) * (x + 1);
+    displayValue = Math.round(displayValue / 50) * 50;
     for (let y = 0; y < NUM_CATEGORIES; y++) {
-      const $clue = $(`<td class="clue">?</td>`);
+      const $clue = $(`<td class="clue">$${displayValue}</td>`);
       $clue.addClass("unclicked").data({ categoryIndex: y, clueIndex: x });
       $questionRow.append($clue);
     }
@@ -309,11 +311,3 @@ async function restart() {
 $("body").on("click", ".clue", handleClick);
 
 setupAndStart();
-
-
-//todo:
-//fix choosing clues bug - rn, depends on having at least one clue in each
-//value category to guarantee uniqueness. found on ID 18170, where 800 value 
-//is instead null.
-//button - shadow - expand or blur edges
-//value numbers?
