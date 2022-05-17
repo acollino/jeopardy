@@ -38,7 +38,7 @@ table {
   font-family: "Stoke", "Times New Roman", serif;
   font-size: 0.75rem;
   text-shadow: 1px 1px 2px black;
-  border: 0.4rem solid rgb(194, 141, 7);
+  border: 0.4rem solid rgb(112, 132, 141);
 }
 
 .category-title {
@@ -89,8 +89,10 @@ td {
 }
 
 .unclicked {
-  font-size: 3.75rem;
-  font-weight: bold;
+  font-family: Impact, 'Arial Narrow Bold', sans-serif;
+  font-size: 4rem;
+  color: rgb(228, 166, 10);
+  text-shadow: 2px 2px 2px black;
 }
 
 .unclicked:active {
@@ -127,7 +129,7 @@ td {
   border-radius: 0.25rem;
   padding: 0.5rem;
   border-style: none;
-  box-shadow: 0.1rem 0.2rem rgb(16, 16, 16);
+  box-shadow: 0.1rem 0.2rem 0.07rem rgb(16, 16, 16);
   font-size: 1.5rem;
   margin: 1rem auto;
   transition: 100ms;
@@ -135,8 +137,8 @@ td {
 
 #restart:hover {
   filter: brightness(110%);
-  transform: translate(-0.1rem, -0.2rem);
-  box-shadow: 0.2rem 0.4rem rgb(16 16 16);
+  transform: translate(-0.05rem, -0.1rem);
+  box-shadow: 0.15rem 0.3rem 0.15rem rgb(16 16 16);
 }
 
 #restart:active {
