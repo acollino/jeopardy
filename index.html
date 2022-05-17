@@ -1,21 +1,81 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Jeopardy</title>
-  <link href="https://fonts.googleapis.com/css?family=Copse&display=swap"
-        rel="stylesheet">
-  <link rel="stylesheet" href="jeopardy.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Jeopardy</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Copse&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="jeopardy.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0"
+    />
+  </head>
+  <body>
+    <script src="https://unpkg.com/jquery"></script>
+    <script src="https://unpkg.com/axios/dist/axios.js"></script>
+    <script src="https://unpkg.com/lodash"></script>
+    <script defer src="jeopardy.js"></script>
 
-<script src="https://unpkg.com/jquery"></script>
-<script src="https://unpkg.com/axios/dist/axios.js"></script>
-<script src="https://unpkg.com/lodash"></script>
-<script src="jeopardy.js"></script>
-
-</body>
+    <div class="help">
+      <h2 id="game-title">Welcome to Jeopardy! Here's how to play:</h2>
+      <!-- <div class="help-info"></div> -->
+      <div id="flex-container">
+        <div id="info-container">
+          <div class="help-info">
+            The board will show a series of categories,
+            <div>each with clues that increase in difficulty.</div>
+          </div>
+          <div class="help-info">
+            Click on a dollar value to reveal the <em>answer</em> for a clue;
+            <div>it's up to you to ask the question it belongs to!</div>
+          </div>
+          <div class="help-info">
+            For example, if the given answer was
+            <div class="sub-info">
+              <em>"A flat boat made by tying together pieces of wood,"</em>
+            </div>
+            then the expected question would be
+            <div class="sub-info"><strong>"What is a raft?"</strong></div>
+          </div>
+          <div class="help-info">
+            <div>When ready, click the answer to reveal</div>
+            <div>the content required for its question.</div>
+            <div class="sub-info">
+              If you'd like to check the prompt again,
+              <div>another click will flip the clue for you.</div>
+            </div>
+          </div>
+        </div>
+        <div id="icon-container">
+          <div id="symbol-board" class="material-symbols-outlined">
+            view_comfy
+          </div>
+          <div id="symbol-reveal-clue">
+            <span class="material-symbols-outlined"> local_atm </span>
+            <span class="material-symbols-outlined"> ads_click </span>
+            <span class="material-symbols-outlined"> help_center </span>
+          </div>
+          <div id="symbol-card-flip">
+            <span class="material-symbols-outlined"> help_center </span>
+            <span class="material-symbols-outlined"> screen_rotation </span>
+            <span class="material-symbols-outlined"> check_box </span>
+          </div>
+        </div>
+      </div>
+      <div class="help-info">
+        <strong>Click to get started:</strong>
+        <button id="start" class="color-button">
+          <span id="start-arrow" class="material-symbols-outlined"> arrow_forward </span>
+        </button>
+      </div>
+    </div>
+  </body>
 </html>
