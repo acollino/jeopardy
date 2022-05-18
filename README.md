@@ -7,4 +7,4 @@ This app was built using VSCode in WSL. Starter code for the HTML and JS was pro
 If you enjoyed this app or have comments/feedback, feel free to reach out at arcollino@gmail.com!
 
 <strong>Preview:</strong>
-![image](https://user-images.githubusercontent.com/8853721/167908588-3a16e663-9695-452a-9c34-55015e2bde1b.png)
+![image](https://user-images.githubusercontent.com/8853721/168938182-ed2a50f6-8d9c-441f-be55-fd6333709eba.png)
