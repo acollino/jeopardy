@@ -1,11 +1,4 @@
-/* some colors you may find useful:
-  #115ff4
-  #060ce9
-  #28a200
-  #8d2ab5
-  #74119c
-*/
-@import url('https://fonts.googleapis.com/css2?family=Stoke');
+@import url("https://fonts.googleapis.com/css2?family=Stoke");
 
 .loading {
   border: 1rem solid #4858a6;
@@ -27,20 +20,29 @@
 }
 
 html {
-  background-image: linear-gradient(#010c49, #0025a9, #536ffc, #e9a288, #536ffc, #0025a9, #010c49);
+  background-image: linear-gradient(
+    #010c49,
+    #0025a9,
+    #536ffc,
+    #e9a288,
+    #536ffc,
+    #0025a9,
+    #010c49
+  );
   background-attachment: fixed;
 }
 
-table{
-  background-color: white;  
+table {
+  background-color: transparent;
   margin: 1.5rem auto;
   font-family: "Stoke", "Times New Roman", serif;
   font-size: 0.75rem;
   text-shadow: 1px 1px 2px black;
+  border: 0.4rem solid rgb(112, 132, 141);
 }
 
 .category-title {
-  font-family: Impact, 'Arial Narrow Bold', sans-serif;
+  font-family: Impact, "Arial Narrow Bold", sans-serif;
   height: 4rem;
   font-size: 1.5rem;
 }
@@ -48,6 +50,7 @@ table{
 td {
   background-color: #070db3;
   border: 0.25rem solid #070db3;
+  outline: 0.1rem solid #00046c;
   color: antiquewhite;
   text-align: center;
   width: 14rem;
@@ -55,23 +58,57 @@ td {
   padding: 0.5rem;
   box-sizing: border-box;
   position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1s;
 }
 
-.unclicked:hover, .question:hover{
-  border: 0.25rem solid rgb(255, 208, 0);
-  filter: brightness(120%);
+.face {
+  backface-visibility: hidden;
 }
 
-.unclicked:active, .question:active{
-  filter: brightness(80%);
+.face:last-child {
+  transform: rotateY(0.5turn);
+  position: absolute;
+  top: 30%;
+  left: 0%;
+  right: 0%;
+}
+
+.flip {
+  transform: rotateY(0.5turn);
+}
+
+.shrink {
+  animation: shrink-out 0.1s linear 0s 2 alternate none;
+}
+
+@keyframes shrink-out {
+  100% {
+    font-size: 0.01rem;
+  }
 }
 
 .unclicked {
-  font-size: 3.75rem;
-  font-weight: bold;
+  font-family: Impact, 'Arial Narrow Bold', sans-serif;
+  font-size: 4rem;
+  color: rgb(228, 166, 10);
+  text-shadow: 2px 2px 2px black;
 }
 
-.back{
+.unclicked:active {
+  filter: brightness(80%);
+}
+
+.unclicked:hover {
+  filter: brightness(120%);
+}
+
+.unclicked:hover,
+.clue-q-and-a:hover {
+  border: 0.25rem solid rgb(255, 208, 0);
+}
+
+.back {
   background-color: #128624;
   width: 1rem;
   position: absolute;
@@ -79,7 +116,7 @@ td {
   left: -0.25rem;
 }
 
-.back:hover{
+.back:hover {
   filter: brightness(140%);
   user-select: none;
 }
@@ -87,18 +124,21 @@ td {
 #restart {
   display: block;
   color: rgb(227, 227, 227);
-  background-color: rgb(182, 28, 28);
+  background-color: rgb(145, 23, 23);
   text-shadow: 0 0 1rem black;
   border-radius: 0.25rem;
   padding: 0.5rem;
   border-style: none;
-  box-shadow: 0.1rem 0.2rem rgb(16, 16, 16);
+  box-shadow: 0.1rem 0.2rem 0.07rem rgb(16, 16, 16);
   font-size: 1.5rem;
   margin: 1rem auto;
+  transition: 100ms;
 }
 
 #restart:hover {
-  filter: brightness(115%);
+  filter: brightness(110%);
+  transform: translate(-0.05rem, -0.1rem);
+  box-shadow: 0.15rem 0.3rem 0.15rem rgb(16 16 16);
 }
 
 #restart:active {

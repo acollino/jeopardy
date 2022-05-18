@@ -114,12 +114,12 @@ function buildClueArray(sortedClueMap) {
   return clueArray;
 }
 
-function filterCategories(categoryArray, numClues,) {
+function filterCategories(categoryArray, numClues) {
   let filteredCategories = [];
   categoryArray.forEach((category) => {
     let uniqueClues = getUniqueClues(category);
     if (uniqueClues.length >= numClues) {
-      let clues = buildClueArray(sortClueDifficulty(category.clues));
+      let clues = buildClueArray(sortClueDifficulty(uniqueClues));
       categoryIDSet.add(category.id);
       let uniqueCategory = { title: category.title, clues };
       filteredCategories.push(shortenCategory(uniqueCategory));
@@ -134,7 +134,7 @@ async function getValidCategories(amountCategories) {
   return filterCategories(categoriesFromID, NUM_QUESTIONS_PER_CAT);
 }
 
-async function fillValidCategoryArray() {
+async function fillArrayWithValidCategories() {
   console.time("getting data");
   let amountCategories = NUM_CATEGORIES;
   categories = await getValidCategories(amountCategories);
@@ -189,8 +189,10 @@ async function fillTable() {
   }
   for (let x = 0; x < NUM_QUESTIONS_PER_CAT; x++) {
     const $questionRow = $("<tr>");
+    let displayValue = (NUM_MAX_CLUE_VALUE / NUM_QUESTIONS_PER_CAT) * (x + 1);
+    displayValue = Math.round(displayValue / 50) * 50;
     for (let y = 0; y < NUM_CATEGORIES; y++) {
-      const $clue = $(`<td class="clue">?</td>`);
+      const $clue = $(`<td class="clue">$${displayValue}</td>`);
       $clue.addClass("unclicked").data({ categoryIndex: y, clueIndex: x });
       $questionRow.append($clue);
     }
@@ -209,35 +211,32 @@ async function fillTable() {
  * */
 
 function handleClick(evt) {
-  const $clue = $(evt.target);
+  const $clue = $(evt.target).closest(".clue");
   let { categoryIndex, clueIndex } = $clue.data();
   let clueInfo = categories[categoryIndex].clues[clueIndex];
-  if (clueInfo.showing === "answer") {
+  if (clueInfo.showing === null) {
+    clueInfo.showing = "flipQandA";
+    $clue.addClass("shrink");
+    $clue.on("animationiteration", () => {
+      $clue.removeClass("unclicked").addClass("clue-q-and-a").text("");
+      addFaces($clue, clueInfo);
+    });
+    $clue.on("animationend", () => {
+      $clue.removeClass(["shrink"]);
+    });
     return;
-  } else if (clueInfo.showing === null) {
-    clueInfo.showing = "question";
-    $clue.removeClass("unclicked").addClass("question").text(clueInfo.question);
-    return;
-  } else if (clueInfo.showing === "question") {
-    clueInfo.showing = "answer";
-    const $back = $(`<div class="back">◀</div>`).on("click", backToQuestion);
-    $clue
-      .removeClass("question")
-      .addClass("answer")
-      .text(clueInfo.answer)
-      .append($back);
+  } else if (clueInfo.showing === "flipQandA") {
+    $clue.toggleClass("flip");
     return;
   }
 }
 
-function backToQuestion(evt) {
-  const $back = $(evt.target);
-  const $clue = $back.parent();
-  $clue.removeClass("answer");
-  let { categoryIndex, clueIndex } = $clue.data();
-  let clueInfo = categories[categoryIndex].clues[clueIndex];
-  clueInfo.showing = null;
-  $clue.click();
+function addFaces($clue, clueInfo) {
+  let $faceFront = $('<div class="face">');
+  $faceFront.text(clueInfo.question);
+  let $faceBack = $('<div class="face">');
+  $faceBack.text(clueInfo.answer);
+  $clue.append([$faceFront, $faceBack]);
 }
 
 /** Wipe the current Jeopardy board, show the loading spinner,
@@ -280,7 +279,7 @@ function hideLoadingView() {
 async function setupAndStart() {
   const $loadingCircle = $(`<div class="loading">`);
   $("body").append($loadingCircle);
-  await fillValidCategoryArray().then(function () {
+  await fillArrayWithValidCategories().then(function () {
     const $gameTable = $('<table id="jeopardy">').hide();
     const $restartButton = $('<button id="restart">Restart</button>').hide();
     $restartButton.on("click", restart);
@@ -296,7 +295,7 @@ async function restart() {
   showLoadingView();
   $("#jeopardy").empty();
   categoryIDSet.clear();
-  await fillValidCategoryArray().then(function () {
+  await fillArrayWithValidCategories().then(function () {
     fillTable();
     hideLoadingView();
   });
