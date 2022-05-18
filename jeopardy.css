@@ -1,5 +1,50 @@
 @import url("https://fonts.googleapis.com/css2?family=Stoke");
 
+#help-title {
+  color: white;
+}
+
+#help {
+  background-color: #163ecf;
+  max-width: 60%;
+  margin: 3rem auto 0 auto;
+  text-align: center;
+  border: .25rem solid darkslategray;
+  font-family: Arial, Helvetica, sans-serif;
+  border-radius: 1rem;
+}
+
+.help-info {
+  font-size: 1.3rem;
+}
+
+.sub-info {
+  margin: 0.3rem
+}
+
+#flex-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+  box-sizing: border-box;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background-color: #536ffc;
+}
+
+.icon-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+#symbol-card-flip > .material-symbols-outlined, 
+#symbol-reveal-clue > .material-symbols-outlined{
+  font-size: 2.5rem;
+  line-height: 1.25;
+}
+
 .loading {
   border: 1rem solid #4858a6;
   border-top: 1rem solid #101f77;
@@ -103,8 +148,7 @@ td {
   filter: brightness(120%);
 }
 
-.unclicked:hover,
-.clue-q-and-a:hover {
+.clue:hover {
   border: 0.25rem solid rgb(255, 208, 0);
 }
 
@@ -121,27 +165,48 @@ td {
   user-select: none;
 }
 
-#restart {
-  display: block;
-  color: rgb(227, 227, 227);
-  background-color: rgb(145, 23, 23);
+.color-button {
   text-shadow: 0 0 1rem black;
   border-radius: 0.25rem;
   padding: 0.5rem;
   border-style: none;
   box-shadow: 0.1rem 0.2rem 0.07rem rgb(16, 16, 16);
   font-size: 1.5rem;
-  margin: 1rem auto;
   transition: 100ms;
 }
 
-#restart:hover {
+#start {
+  background-color: rgb(25, 145, 23);
+  color: rgb(227, 227, 227);
+  text-shadow: none;
+  margin: 1rem auto;
+}
+
+#button-container {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+}
+
+#help-button {
+  display: block;
+  background-color: rgb(68, 117, 173);
+  color: rgb(227, 227, 227);
+}
+
+#restart {
+  display: block;
+  background-color: rgb(145, 23, 23);
+  color: rgb(227, 227, 227);
+}
+
+.color-button:hover {
   filter: brightness(110%);
   transform: translate(-0.05rem, -0.1rem);
   box-shadow: 0.15rem 0.3rem 0.15rem rgb(16 16 16);
 }
 
-#restart:active {
+.color-button:active {
   filter: brightness(75%);
   box-shadow: 0.05rem 0.1rem rgb(16, 16, 16);
   transform: translate(0.05rem, 0.1rem);
