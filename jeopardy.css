@@ -1,9 +1,13 @@
 @import url("https://fonts.googleapis.com/css2?family=Stoke");
 
+#help-title {
+  color: white;
+}
+
 #help {
   background-color: #163ecf;
   max-width: 60%;
-  margin: 3rem auto;
+  margin: 3rem auto 0 auto;
   text-align: center;
   border: .25rem solid darkslategray;
   font-family: Arial, Helvetica, sans-serif;
@@ -20,47 +24,25 @@
 
 #flex-container {
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
   box-sizing: border-box;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  justify-content: space-evenly;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
   background-color: #536ffc;
 }
 
-#info-container, #icon-container {
+.icon-container {
   display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+  justify-content: center;
+  gap: 1rem;
 }
 
-#info-container {
-  max-width: 70%;
-  padding: 1rem 3rem;
-  gap: 2rem;
-}
-
-.material-symbols-outlined {
-  font-size: inherit;
-}
-
-#icon-container {
-  justify-content: space-between;
-  padding: 0.5rem 0rem;
-}
-
-#symbol-board, 
 #symbol-card-flip > .material-symbols-outlined, 
 #symbol-reveal-clue > .material-symbols-outlined{
-  font-size: 4rem;
-}
-
-#symbol-reveal-clue {
-  margin-bottom: 50%;
-}
-
-#input-container {
-  margin: 1rem;
-  font-size: 1.2rem;
+  font-size: 2.5rem;
+  line-height: 1.25;
 }
 
 .loading {
@@ -166,8 +148,7 @@ td {
   filter: brightness(120%);
 }
 
-.unclicked:hover,
-.clue-q-and-a:hover {
+.clue:hover {
   border: 0.25rem solid rgb(255, 208, 0);
 }
 
@@ -191,7 +172,6 @@ td {
   border-style: none;
   box-shadow: 0.1rem 0.2rem 0.07rem rgb(16, 16, 16);
   font-size: 1.5rem;
-  margin: 1rem auto;
   transition: 100ms;
 }
 
@@ -199,11 +179,19 @@ td {
   background-color: rgb(25, 145, 23);
   color: rgb(227, 227, 227);
   text-shadow: none;
+  margin: 1rem auto;
 }
 
-#start-arrow {
-  font-size: 2rem;
-  vertical-align: middle;
+#button-container {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+}
+
+#help-button {
+  display: block;
+  background-color: rgb(68, 117, 173);
+  color: rgb(227, 227, 227);
 }
 
 #restart {
