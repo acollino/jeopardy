@@ -1,21 +1,74 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Jeopardy</title>
-  <link href="https://fonts.googleapis.com/css?family=Copse&display=swap"
-        rel="stylesheet">
-  <link rel="stylesheet" href="jeopardy.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+    />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Jeopardy</title>
+    <link
+      href="https://fonts.googleapis.com/css?family=Copse&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="jeopardy.css" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0"
+    />
+  </head>
+  <body>
+    <script src="https://unpkg.com/jquery"></script>
+    <script defer src="jeopardy.js"></script>
 
-<script src="https://unpkg.com/jquery"></script>
-<script src="https://unpkg.com/axios/dist/axios.js"></script>
-<script src="https://unpkg.com/lodash"></script>
-<script src="jeopardy.js"></script>
-
-</body>
+    <div id="help">
+      <h2 id="help-title">Welcome to Jeopardy!</h2>
+      <div id="flex-container">
+        <div class="help-info">
+          The board will show a series of categories,
+          <div>each with clues that increase in difficulty.</div>
+        </div>
+        <div class="icon-container">
+          <div class="help-info">
+            Click on a dollar value to reveal the
+            <strong><em>answer</em></strong> for a clue;
+            <div>it's up to you to ask the question it answers!</div>
+          </div>
+          <div id="symbol-reveal-clue">
+            <span class="material-symbols-outlined"> local_atm </span>
+            <span class="material-symbols-outlined"> ads_click </span>
+            <span class="material-symbols-outlined"> help_center </span>
+          </div>
+        </div>
+        <details>
+          <summary>Show clue example</summary>
+          <div class="help-info sub-info">
+            If the given answer was
+            <div class="sub-info">
+              <em>"A flat boat made by tying together pieces of wood,"</em>
+            </div>
+            then the expected question would be
+            <div class="sub-info"><b>"What is a raft?"</b></div>
+          </div>
+        </details>
+        <div class="help-info">
+          When you're ready, click the answer to reveal
+          <div>what you needed to include in your question.</div>
+        </div>
+        <div class="icon-container">
+          <div class="help-info">
+            If you'd like to check the prompt again,
+            <div>another click will flip the clue for you.</div>
+          </div>
+          <div id="symbol-card-flip">
+            <span class="material-symbols-outlined"> help_center </span>
+            <span class="material-symbols-outlined"> screen_rotation </span>
+            <span class="material-symbols-outlined"> check_box </span>
+          </div>
+        </div>
+      </div>
+      <button id="start" class="color-button">Show the board</button>
+    </div>
+  </body>
 </html>
